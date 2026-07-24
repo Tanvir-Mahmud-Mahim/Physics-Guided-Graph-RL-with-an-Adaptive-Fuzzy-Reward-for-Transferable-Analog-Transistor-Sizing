@@ -1,0 +1,23 @@
+* Minimal SKY130 tt lib: nfet_01v8 + pfet_01v8 only (binned tt models)
+.include "parameters/invariant.spice"
+.include "parameters/lod.spice"
+.param sky130_fd_pr__nfet_01v8__toxe_slope = 0
+.param sky130_fd_pr__nfet_01v8__toxe_slope_spectre = 0
+.param sky130_fd_pr__nfet_01v8__voff_slope = 0
+.param sky130_fd_pr__nfet_01v8__voff_slope_spectre = 0
+.param sky130_fd_pr__nfet_01v8__vth0_slope = 0
+.param sky130_fd_pr__nfet_01v8__vth0_slope1 = 0
+.param sky130_fd_pr__nfet_01v8__vth0_slope_spectre = 0
+.param sky130_fd_pr__nfet_01v8__nfactor_slope = 0
+.param sky130_fd_pr__nfet_01v8__nfactor_slope_spectre = 0
+.param sky130_fd_pr__pfet_01v8__toxe_slope = 0
+.param sky130_fd_pr__pfet_01v8__toxe_slope_spectre = 0
+.param sky130_fd_pr__pfet_01v8__voff_slope = 0
+.param sky130_fd_pr__pfet_01v8__voff_slope_spectre = 0
+.param sky130_fd_pr__pfet_01v8__vth0_slope = 0
+.param sky130_fd_pr__pfet_01v8__vth0_slope1 = 0
+.param sky130_fd_pr__pfet_01v8__vth0_slope_spectre = 0
+.param sky130_fd_pr__pfet_01v8__nfactor_slope = 0
+.param sky130_fd_pr__pfet_01v8__nfactor_slope_spectre = 0
+.include "../cells/nfet_01v8/sky130_fd_pr__nfet_01v8__tt.pm3.spice"
+.include "../cells/pfet_01v8/sky130_fd_pr__pfet_01v8__tt.pm3.spice"
