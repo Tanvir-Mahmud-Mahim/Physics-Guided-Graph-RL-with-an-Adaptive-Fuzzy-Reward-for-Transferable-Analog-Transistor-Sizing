@@ -88,6 +88,7 @@ Physics-Guided-Graph-RL-...-Transistor-Sizing/
 |-- CHANGELOG.md           what changed, newest first
 |-- CITATION.cff           citation details (drives the "Cite this repository" button)
 |-- LICENSE                Apache-2.0 license
+|-- .gitignore             keeps results/, pdk/ and __pycache__/ out of git
 |-- gcnsac/                the Python package (see Section 7)
 |   |-- pdk.py             the four technologies: model file paths, supply voltage, size limits
 |   |-- circuits.py        the three test circuits: netlists and circuit graphs
@@ -106,9 +107,10 @@ Physics-Guided-Graph-RL-...-Transistor-Sizing/
 |   |-- worker.py          looping worker for the chunk2.py job list
 |   |-- chunk3.py          EKV version on CT-1 and CT-3, and transfer from EKV-trained agents
 |   |-- aggregate.py       collects all run logs into results/agg/aggregate.json
-|   |-- gen_tables.py      LaTeX tables and text macros for the paper
+|   |-- gen_tables.py      LaTeX tables and text macros for the paper (into results/tables/)
 |   |-- figures.py         paper figures (PDF)
-|   `-- fig_advantage.py   the "advantage" figure and its text macros
+|   |-- fig_advantage.py   the "advantage" figure and its text macros
+|   `-- check_pdk_reproduction.py  checks that your ngspice and PDK files reproduce the archived logs
 |-- pdk_setup/             helper model files (no foundry PDK files, see below)
 |   |-- 65nm_bulk.pm       PTM 65 nm model card (text)
 |   |-- 45nm_bulk.pm       PTM 45 nm metal-gate/high-k model card (text)
@@ -144,9 +146,9 @@ The earlier README described the model archive as "448 trained model
 checkpoints (`results/w/*.pt`)"; the 448 files are in fact 239 `.pt` files
 plus 209 `.npy` files. Neither archive contains PDK or model-card files.
 
-The folders `results/` (after unpacking) and `pdk/` (if you download the
-PDKs there) are not part of the repository. There is no `.gitignore`, so git
-lists them as untracked; please do not commit them.
+The folders `results/` (after unpacking, and all generated outputs) and
+`pdk/` (if you download the PDKs there) are not part of the repository; the
+`.gitignore` file keeps them out of git.
 
 ---
 
@@ -194,27 +196,33 @@ export GCNSAC_PDK_ROOT=$PWD/pdk
 mkdir -p pdk/ptm
 cp pdk_setup/65nm_bulk.pm pdk_setup/45nm_bulk.pm pdk/ptm/
 
-# GF180MCU (only models/ngspice is used)
-git clone --depth 1 --filter=blob:none --sparse https://github.com/google/globalfoundries-pdk-libs-gf180mcu_fd_pr pdk/gf180
-(cd pdk/gf180 && git sparse-checkout set models/ngspice)
+# GF180MCU (only models/ngspice is used), pinned to commit 9f992d5
+git clone --filter=blob:none --no-checkout https://github.com/google/globalfoundries-pdk-libs-gf180mcu_fd_pr pdk/gf180
+(cd pdk/gf180 && git sparse-checkout set models/ngspice && git checkout 9f992d5a9186d1f7820c58f039c484ad35b2edea)
 
-# SKY130 (only the models and two transistor cells are used)
-git clone --depth 1 --filter=blob:none --sparse https://github.com/google/skywater-pdk-libs-sky130_fd_pr pdk/sky130
-(cd pdk/sky130 && git sparse-checkout set models cells/nfet_01v8 cells/pfet_01v8)
+# SKY130 (only the models and two transistor cells are used), pinned to commit f62031a
+git clone --filter=blob:none --no-checkout https://github.com/google/skywater-pdk-libs-sky130_fd_pr pdk/sky130
+(cd pdk/sky130 && git sparse-checkout set models cells/nfet_01v8 cells/pfet_01v8 && git checkout f62031a1be9aefe902d6d54cddd6f59b57627436)
 cp pdk_setup/sky130_mini_tt.spice pdk/sky130/models/mini_tt.spice
 ```
 
-A full `git clone --depth 1` of the GF180MCU repository (as in the earlier
-README) gives the same files. The sparse downloads took about 128 MB
-(GF180MCU) and 28 MB (SKY130) here. Both upstream repositories are licensed
-Apache-2.0. `export` lasts only for the current terminal; set it again in a
-new one.
+The downloads took about 128 MB (GF180MCU) and 28 MB (SKY130) here. Both
+upstream repositories are licensed Apache-2.0. `export` lasts only for the
+current terminal; set it again in a new one.
 
-**Which PDK version?** The repository does not record the versions used for
-the paper. The checks here used the upstream `main` branch: GF180MCU commit
-`9f992d5` (31 May 2023) and SKY130 commit `f62031a`. With these, SKY130 and
-PTM results matched the archived logs exactly, but GF180MCU results did not
-(see [Section 10](#10-notes-on-the-calculations)).
+**Which PDK version?** The repository did not record the versions used for
+the run logs. These pins were found and checked as follows (September 2026):
+
+| PDK | Commit | Evidence |
+|---|---|---|
+| GF180MCU | `9f992d5a9186d1f7820c58f039c484ad35b2edea` (31 May 2023, current `main`) | The two model files have never changed on `main`: `design.ngspice` (SHA-256 `8d9721a5...`) and `sm141064.ngspice` (SHA-256 `73fc67d3...`) are identical in all four commits that touch `models/ngspice` (`92ec4b2`, 20 July 2022, to `13fe03d`), so any commit from `92ec4b2` on gives the same files. With them, ngspice 42 reproduces the archived calibration file `results/cal/gf180.json` bit for bit, once ngspice gets the process IDs described in Section 10. |
+| SKY130 | `f62031a1be9aefe902d6d54cddd6f59b57627436` (current `main`) | Re-simulated best designs and the calibration match the archived logs exactly. |
+| PTM 65 nm / 45 nm | the cards in `pdk_setup/` | Re-simulated best designs match exactly. |
+
+`python3 scripts/check_pdk_reproduction.py` tests your set-up (Section 9).
+**GF180MCU results cannot be reproduced exactly from these files alone:**
+the GF180MCU model files switch on random transistor mismatch, and ngspice
+seeds it with a number that the logs do not record (Section 10).
 
 ---
 
@@ -229,7 +237,6 @@ Needs Python only (no ngspice, no PDKs).
 ```
 tar xzf results_logs.tar.gz
 cat models.tar.gz.part-* | tar xz
-mkdir -p ~/work/paper
 cp results/agg/aggregate.json aggregate_archived.json
 python3 scripts/aggregate.py
 cmp results/agg/aggregate.json aggregate_archived.json && echo "aggregate.json unchanged"
@@ -242,8 +249,7 @@ python3 scripts/fig_advantage.py
   circuit, and rewrites `results/agg/aggregate.json` (byte-identical to the
   archived copy).
 - `gen_tables.py` and `fig_advantage.py` write LaTeX files into
-  `~/work/paper/`. **This folder must exist** (hence the `mkdir`); otherwise
-  they stop with `FileNotFoundError`.
+  `results/tables/` (they create the folder).
 - The figures go to `results/figs/`.
 
 Both archives are needed: two figures read the `results/w/*_tskfhist.npy`
@@ -258,27 +264,30 @@ after `tar xzf results_logs.tar.gz`):
 mkdir -p pdk/ptm
 cp pdk_setup/65nm_bulk.pm pdk_setup/45nm_bulk.pm pdk/ptm/
 export GCNSAC_PDK_ROOT=$PWD/pdk
-mkdir -p ~/work/gcnsac/results/cal
-cp results/cal/*.json ~/work/gcnsac/results/cal/
 python3 scripts/run.py --method gcnsac_tskf_pia --ct CT1 --pdk ptm65 --seed 0 --budget 150 --tag check_tr_CT1_ptm65_sc_s0
 python3 -c "import json; a=json.load(open('results/tr_CT1_ptm65_sc_s0.json')); b=json.load(open('results/check_tr_CT1_ptm65_sc_s0.json')); print('same history:', a['history']==b['history'], a['best_fom'], b['best_fom'])"
 ```
 
 This repeats the archived run `tr_CT1_ptm65_sc_s0` (the proposed method
 trained from scratch on CT-1 at 65 nm, 150 simulations). Here it printed
-`same history: True 3.792502335347418 3.792502335347418`. The copy into
-`~/work/gcnsac/results/cal/` is explained in Section 10 (it overwrites any
-calibration files you already have there).
+`same history: True 3.792502335347418 3.792502335347418` (13 s, measured on
+a shared 2-core machine). The run uses the archived calibration files in
+`results/cal/` from `results_logs.tar.gz` (Section 10).
+
+To check the model files of all four technologies at once, run
+`python3 scripts/check_pdk_reproduction.py` (Section 9).
 
 ### Way C: recompute everything (long)
 
 1. Install ngspice and all four technologies (Section 3).
-2. `mkdir -p results` (the campaign scripts write their logs there; if the
-   folder is missing, no run starts).
-3. Run the campaigns in this order, from the repository folder:
+2. Run the campaigns in this order, from the repository folder:
    `campaign_main.sh`, then `campaign2.sh` (or `resume_all.sh` for both),
    then `chunk2.py`, then `chunk3.py`. Details and caveats are in Section 5.
-4. Then run the four commands of Way A (without unpacking the archives).
+3. Then run the four commands of Way A (without unpacking the archives).
+
+PTM and SKY130 runs repeat the archived logs exactly. GF180MCU runs do not:
+every GF180MCU simulation draws new random transistor mismatch (Section 10),
+so recomputed GF180MCU numbers differ from the archived ones.
 
 The archived logs record a total of 16.5 hours of single-run time for all
 326 runs; the scripts run two jobs at a time. These campaigns were not re-run
@@ -300,9 +309,10 @@ here.
 | 4 | `python3 scripts/worker.py [name]` | Alternative to step 4: a worker that takes the next free `chunk2.py` job (several workers can run at once) | as step 4 | `results/claims/` (lock files) |
 | 5 | `python3 scripts/chunk3.py worker [name]` | EKV version on CT-1 and CT-3 (seeds 0-4), and transfer from the EKV-trained agents (`tr3_*`, `tt3_*`). `count` mode counts ready and blocked runs | long (not re-timed); logs: 1.5 h | `results/*.json`, `results/claims3/` |
 | 6 | `python3 scripts/aggregate.py` | Collects all logs into one summary and prints the main comparison | 0.8 s | `results/agg/aggregate.json` |
-| 7 | `python3 scripts/gen_tables.py` | Writes the paper's LaTeX tables and text macros (needs `~/work/paper/`) | 2.6 s | `~/work/paper/*.tex` |
+| 7 | `python3 scripts/gen_tables.py` | Writes the paper's LaTeX tables and text macros | 2.6 s | `results/tables/*.tex` |
 | 8 | `python3 scripts/figures.py` | Draws the paper figures | 8.4 s | `results/figs/*.pdf` |
-| 9 | `python3 scripts/fig_advantage.py` | Draws the advantage figure and writes its macros (needs `~/work/paper/`) | 1.9 s | `results/figs/F_advantage.pdf`, `~/work/paper/adv_macros.tex` |
+| 9 | `python3 scripts/fig_advantage.py` | Draws the advantage figure and writes its macros | 1.9 s | `results/figs/F_advantage.pdf`, `results/tables/adv_macros.tex` |
+| check | `python3 scripts/check_pdk_reproduction.py [--pdk ...] [--gf180-pid]` | Re-simulates the stored best design of 10 archived runs (2-3 per technology) and compares metrics and FoM with the logs; `--gf180-pid` also redoes the GF180MCU calibration with the archived ngspice process IDs (Section 9) | 22 s for the 10 designs; 30 s for `--pdk gf180 --gf180-pid` | printed report; exit status 0 if all expected matches are found |
 
 \*Times measured on a shared two-core computer, except "logs", which is the
 sum of the `wall_s` field over the archived runs of that step (single-run
@@ -331,13 +341,12 @@ weights exist.
 
 **Caveats found in the scripts.**
 
-- `campaign_main.sh`, `campaign2.sh` and `resume_all.sh` begin with
-  `cd /root/work/gcnsac` (the author's folder). Elsewhere this line prints an
-  error and the script carries on in the current folder, so start them from
-  the repository folder.
-- These three scripts send each run's output to `results/<name>.log`. If
-  `results/` does not exist yet, no run starts; create it first
-  (`mkdir -p results`).
+- `campaign_main.sh`, `campaign2.sh` and `resume_all.sh` first change to
+  the repository folder (the folder above `scripts/`), wherever they are
+  started from. To use another folder, set `GCNSAC_DIR=/path/to/folder`; if
+  that folder does not exist, the script stops.
+- These three scripts send each run's output to `results/<name>.log` and
+  create `results/` if it does not exist yet.
 - `chunk.py`, `chunk2.py`, `chunk3.py` and `worker.py` use relative paths
   and must also be started from the repository folder.
 - If a normalization file is missing, `run.py` first simulates 300 random
@@ -362,12 +371,12 @@ output files.
 | `results/figs/F9_ablation.pdf` | Ablation study on CT-2 | `results/agg/aggregate.json` | `figures.py` (`fig_ablation`) |
 | `results/figs/FS1_tskf_dynamics.pdf` | Supplementary: fuzzy-reward adaptation traces | same `.npy` files as `F6_tskf.pdf` | `figures.py` (`fig_tskf_supp`) |
 | `results/figs/F_advantage.pdf` | (a) final FoM of the EKV version, GCN-DDPG and BO; (b) simulations the EKV version needs to reach GCN-DDPG's final FoM | 600-simulation GF180MCU logs | `fig_advantage.py` |
-| `~/work/paper/tab_fom.tex` | Main FoM table (mean and spread, 11 methods, 3 circuits) | `aggregate.json` | `gen_tables.py` |
-| `~/work/paper/tab_metrics.tex` | Measured gain, bandwidth, power and noise of each method's best design | `aggregate.json` | `gen_tables.py` |
-| `~/work/paper/tab_transfer.tex`, `tab_transfer_full.tex` | Transfer results (fine-tuned versus from scratch; the full version adds topology transfer) | `aggregate.json` | `gen_tables.py` |
-| `~/work/paper/tab_perseed.tex` | Per-seed FoM and Welch t-test against the three strongest other methods | run logs | `gen_tables.py` |
-| `~/work/paper/tab_cost.tex` | Simulations and mean run time per method | `aggregate.json` | `gen_tables.py` |
-| `~/work/paper/results_macros.tex`, `adv_macros.tex` | Numbers and sentences used in the paper text | `aggregate.json`, run logs | `gen_tables.py`, `fig_advantage.py` |
+| `results/tables/tab_fom.tex` | Main FoM table (mean and spread, 11 methods, 3 circuits) | `aggregate.json` | `gen_tables.py` |
+| `results/tables/tab_metrics.tex` | Measured gain, bandwidth, power and noise of each method's best design | `aggregate.json` | `gen_tables.py` |
+| `results/tables/tab_transfer.tex`, `tab_transfer_full.tex` | Transfer results (fine-tuned versus from scratch; the full version adds topology transfer) | `aggregate.json` | `gen_tables.py` |
+| `results/tables/tab_perseed.tex` | Per-seed FoM and Welch t-test against the three strongest other methods | run logs | `gen_tables.py` |
+| `results/tables/tab_cost.tex` | Simulations and mean run time per method | `aggregate.json` | `gen_tables.py` |
+| `results/tables/results_macros.tex`, `adv_macros.tex` | Numbers and sentences used in the paper text | `aggregate.json`, run logs | `gen_tables.py`, `fig_advantage.py` |
 
 The regenerated figures were compared with the archived PDFs by rendering
 both to images: all seven that `figures.py` and `fig_advantage.py` redraw
@@ -467,11 +476,32 @@ guide:
   archived PDFs.
 - **One run from scratch** (Way B): `tr_CT1_ptm65_sc_s0` was re-run and gave
   the identical history, best FoM and best design.
-- **Re-simulating stored designs**: the best designs of
-  `tr_CT1_ptm65_sc_s0` (PTM 65 nm) and `tr_CT2_sky130_sc_s1` (SKY130)
-  reproduced their stored metrics exactly. Re-running the calibration gave the
-  archived values for PTM 65 nm and SKY130.
-- **GF180MCU did not match**: see Section 10.
+- **Re-simulating stored designs** (`scripts/check_pdk_reproduction.py`,
+  with ngspice 42 and the pinned PDK commits of Section 3.2): the best designs
+  of `tr_CT1_ptm65_sc_s0`, `tr_CT3_ptm65_ft_s0` (PTM 65 nm),
+  `tr_CT2_ptm45_sc_s0`, `tr_CT3_ptm45_ft_s1` (PTM 45 nm),
+  `tr_CT1_sky130_ft_s2`, `tr_CT2_sky130_sc_s1` and `tr_CT3_sky130_sc_s0`
+  (SKY130) reproduce every stored metric and the FoM exactly (largest
+  difference 0). Re-running the calibration gave the archived values for
+  PTM 65 nm and SKY130.
+- **GF180MCU**: re-simulated designs do not match the logs, and not even each
+  other, because of random transistor mismatch (Section 10). With
+  `--gf180-pid`, the script redoes the GF180MCU calibration with ngspice
+  started under the process IDs found for the archive, and reproduces
+  `results/cal/gf180.json` exactly (all 16 numbers identical). This needs
+  Linux and the `unshare` command (root, or unprivileged user namespaces).
+  Example output:
+
+  ```
+  [ptm65]
+    tr_CT1_ptm65_sc_s0: MATCH; FoM archived 3.792502, now 3.792502; largest relative metric difference 0
+  ...
+  [gf180]
+    bo_CT1_gf180_s0: MISMATCH (expected for gf180: random mismatch, see --help); FoM archived 3.869404, now 3.136734; ...
+    ...
+    gf180 calibration (ngspice PIDs [10243, 10245, 10247, 10250, 10255, 10257, 10259, 10261]) MATCH with results/cal/gf180.json
+  RESULT: all expected matches found
+  ```
 - The `count` modes of `chunk2.py` and `chunk3.py`, and `chunk.py`, report
   that no runs are missing once the archives are unpacked.
 
@@ -500,26 +530,81 @@ guide:
 - **Reward versus score.** The fuzzy reward only trains the agent; the logs
   and tables always use the unified FoM. The fuzzy system adapts toward the
   FoM divided by the number of metrics.
-- **Calibration cache.** `surrogate.py` stores calibrations in
-  `~/work/gcnsac/results/cal/`, a fixed folder in your home directory, not in
-  the repository's `results/cal/`. If a file is missing there, the
-  calibration is redone (8 ngspice runs). Way B copies the archived files
-  there. The archived files for `sky130`, `ptm65` and `ptm45` have no EKV
+- **Calibration cache.** `surrogate.py` stores calibrations in the
+  repository's `results/cal/` (or in the folder named by the environment
+  variable `GCNSAC_CAL_DIR`), whatever folder a script is started from.
+  Unpacking `results_logs.tar.gz` puts the archived files there. If a file
+  is missing, the calibration is redone (8 ngspice runs) and saved there.
+  The archived files for `sky130`, `ptm65` and `ptm45` have no EKV
   slope factor (`n_ekv`); for these, the EKV model uses the code's default
   1.3.
 - **Output folder for tables.** `gen_tables.py` and `fig_advantage.py` write
-  to `~/work/paper/`, which must exist.
+  their LaTeX files to `results/tables/` and create it if needed.
 - **Repeatability.** Every run uses fixed seeds, and PyTorch runs on one CPU
   thread. With the same model files, a re-run gives the same history (checked
-  for PTM 65 nm).
-- **GF180MCU model version.** With the current upstream GF180MCU files
-  (commit `9f992d5`), re-simulating stored GF180MCU designs gave different
-  metrics from the logs (for example, FoM 2.76 instead of 3.87 for the best
-  design of `bo_CT1_gf180_s0`), a re-run of `a2c_CT3_gf180_s1` differed from
-  the first simulation on, and the calibration differed slightly (NMOS
-  threshold 0.360 V instead of 0.356 V). The exact GF180MCU files and ngspice
-  settings used for the paper are not recorded, so recomputed GF180MCU
-  numbers can differ from the archived ones.
+  for PTM 65 nm). This holds for PTM and SKY130, not for GF180MCU (next
+  point).
+- **GF180MCU: every simulation includes random mismatch.** This is why
+  GF180MCU numbers cannot be recomputed exactly. The model files and the
+  ngspice version are not the cause: with the pinned files and ngspice 42 the
+  archived calibration is reproduced bit for bit (below).
+  - *The model files.* The GF180MCU file `design.ngspice` sets
+    `sw_stat_mismatch = 1` (and `sw_stat_global = 1`) by default, and the
+    code loads it unchanged. In the `typical` section, every `nmos_3p3` and
+    `pmos_3p3` transistor is a subcircuit that adds a random threshold-voltage
+    shift, `delvto = agauss(0, 0.7071 * par_vth * 1e-6 / sqrt(Leff * Weff), 1)`
+    with `par_vth` = 0.007148 (NMOS) or 0.00666 (PMOS); for example, a standard
+    deviation of 3.7 mV for W = 4.4 um, L = 0.56 um. (The global process
+    variation is not part of `typical`.) The SKY130 files loaded through the
+    wrapper in `pdk_setup/` and the PTM cards contain no random functions, so
+    these technologies are not affected.
+  - *The random numbers.* ngspice 42, started with a circuit file
+    (`ngspice -b file`, as the code does), seeds these random draws with its
+    own process ID (PID): at start-up it calls `initw()`
+    (`src/frontend/trannoise/wallace.c`), which runs `srand(getpid())` after
+    `.spiceinit` has been read, so `set rndseed` or `setseed` there has no
+    effect (checked). The code starts a new ngspice process for each
+    simulation and does not record the PID, so each archived GF180MCU number is one
+    random sample. The same design gives different results in different
+    simulations. The archive itself shows this: for a given seed, `bo` and
+    `mace` simulate the same 40 starting designs, yet the first design of
+    seed 1 on CT-1 scored 0 in `bo_CT1_gf180_s1` and 3.094 in
+    `mace_CT1_gf180_s1`. In all six seed and circuit cases where at least one
+    of the two logs has a non-zero FoM for that first design, the two values
+    differ (CT-1 seeds 1 and 2, CT-2 seeds 2 and 3, CT-3 seeds 2 and 3).
+  - *Size of the effect.* Twenty re-simulations of the best design of
+    `bo_CT1_gf180_s0` (archived FoM 3.869) gave FoM between 0 and 3.830
+    (median 3.08); three of the twenty scored 0. With mismatch switched off
+    (`.param sw_stat_mismatch=0` after the `.lib` line), the same design
+    gives 3.289, and the NMOS threshold of the
+    calibration is 0.3614 V instead of the archived 0.3557 V. Because the
+    best FoM of a run is the highest of many random samples, a re-simulation
+    of that design usually scores lower than the logged value.
+  - *What was reproduced.* With the pinned GF180MCU files (Section 3.2),
+    ngspice 42 and the PIDs 10243, 10245, 10247 and 10250 (NMOS sweeps) and
+    10255 (PMOS gate sweep; the three PMOS drain sweeps gave the lower
+    limit 0.001 for every PID tried), the calibration file
+    `results/cal/gf180.json` is reproduced exactly. These PIDs were found by re-implementing the ngspice
+    random-number steps (glibc `srand`/`rand`, the Tausworthe generator and
+    `initw()`), checked against real ngspice runs started under chosen PIDs
+    in a new Linux PID namespace. Each ngspice 42 run uses two PID numbers
+    (the process and one thread). This confirms the model files and the
+    ngspice version; it needs a Linux system with glibc (other C libraries
+    and ngspice versions were not tested).
+  - *What cannot be reproduced.* The PIDs of the 128,100 GF180MCU
+    simulations in the 218 GF180MCU run logs are unknown, so these logs
+    cannot be recomputed exactly with any PDK version or setting. Switching mismatch
+    off gives repeatable numbers, but they are different from the archived
+    ones. The code was left unchanged so that it still describes how the
+    archived results were made.
+  - *Calibration file date.* In `results_logs.tar.gz`, `results/cal/gf180.json`
+    is dated 24 July 2026 06:13, later than most GF180MCU runs (from 23 July
+    22:26), and it contains the EKV slope factor `n_ekv`, which the SKY130
+    and PTM files written at 02:40 to 02:56 lack. No archived GF180MCU log
+    counts the 8 calibration simulations (`sims_used` equals the budget in
+    all of them). This suggests that GF180MCU runs of the graph-based agents
+    finished before 06:13 used an earlier calibration, which is not in the
+    archive; the file dates are the only evidence for this.
 - **Which transfer runs the tables use.** `aggregate.py` uses `tr3_*_ft`
   (EKV-trained encoder) for "with transfer" when at least three such logs
   exist, otherwise `tr_*_ft`; "no transfer" is always `tr_*_sc`. Topology
@@ -542,7 +627,8 @@ The repository has no tagged releases.
 
 | Version | Date | Changes |
 |---|---|---|
-| Documentation update (this version) | 30 Sep 2026 | New README, CHANGELOG and CITATION; code and data unchanged |
+| Fixes (this version) | 30 Sep 2026 | Table and macro files go to `results/tables/`; calibration cache in `results/cal/`; campaign scripts no longer `cd /root/work/gcnsac` and create `results/`; `.gitignore`; PDK commits pinned; `check_pdk_reproduction.py`; GF180MCU reproducibility explained |
+| Documentation update | 30 Sep 2026 | New README, CHANGELOG and CITATION; code and data unchanged |
 | Initial upload | 24 Jul 2026 | Code, run-log archive, model archive and `pdk_setup/` |
 
 Details are in [CHANGELOG.md](CHANGELOG.md).

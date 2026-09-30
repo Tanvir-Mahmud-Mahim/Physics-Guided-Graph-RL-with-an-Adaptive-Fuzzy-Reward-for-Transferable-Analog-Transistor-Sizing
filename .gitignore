@@ -1,0 +1,5 @@
+# unpacked archives and generated outputs (results/tables/, results/figs/, run logs)
+results/
+# locally downloaded PDK model files (never commit these)
+pdk/
+__pycache__/
