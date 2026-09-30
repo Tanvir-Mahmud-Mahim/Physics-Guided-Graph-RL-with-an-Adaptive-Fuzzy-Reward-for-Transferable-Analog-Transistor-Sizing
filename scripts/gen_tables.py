@@ -1,12 +1,14 @@
 #!/usr/bin/env python3
 """Generate LaTeX table fragments and text macros from aggregate.json.
-Every number in the paper comes from here; no hand-typed results."""
+Every number in the paper comes from here; no hand-typed results.
+Output: results/tables/ (created if missing)."""
 import json, os, glob
 import numpy as np
 from scipy import stats
 
 RES = os.path.join(os.path.dirname(__file__), "..", "results")
-PAP = os.path.expanduser("~/work/paper")
+OUT = os.path.join(RES, "tables")
+os.makedirs(OUT, exist_ok=True)
 agg = json.load(open(os.path.join(RES, "agg", "aggregate.json")))
 
 LBL = {"bo": "BO", "mace": "MACE", "a2c": "NG-A2C", "ppo": "NG-PPO",
@@ -39,7 +41,7 @@ for ct in ("CT1", "CT2", "CT3"):
     if ok:
         best_per_ct[ct] = max(ok, key=lambda m: ok[m]["mean"])
 
-with open(os.path.join(PAP, "tab_fom.tex"), "w") as fh:
+with open(os.path.join(OUT, "tab_fom.tex"), "w") as fh:
     fh.write("\\begin{table}[t]\n\\caption{Unified environment FoM "
              "(Eq.~(3)), mean $\\pm$ std over \\SeedCount\\ seeds, 600 "
              "simulator evaluations per run, GF180MCU 180 nm. Bold: best per "
@@ -83,7 +85,7 @@ def val_fmt(x, scale):
         return f"{v:.2e}".replace("e-0", "e-").replace("e+0", "e")
     return f"{v:.3g}"
 
-with open(os.path.join(PAP, "tab_metrics.tex"), "w") as fh:
+with open(os.path.join(OUT, "tab_metrics.tex"), "w") as fh:
     fh.write("\\begin{table}[t]\n\\caption{Measured metrics of the best "
              "design found by each method (best of five seeds, GF180MCU). "
              "Noise is the integrated input-referred noise reported by "
@@ -110,7 +112,7 @@ with open(os.path.join(PAP, "tab_metrics.tex"), "w") as fh:
     fh.write("\\end{table}\n")
 
 # ---------------- Table: transfer summary ----------------
-with open(os.path.join(PAP, "tab_transfer.tex"), "w") as fh:
+with open(os.path.join(OUT, "tab_transfer.tex"), "w") as fh:
     fh.write("\\begin{table}[t]\n\\caption{Technology transfer: final FoM "
              "after 150 evaluations, fine-tuned (FT) from the 180 nm agent "
              "versus from scratch (SC), mean $\\pm$ std over seeds.}\n"
@@ -136,7 +138,7 @@ with open(os.path.join(PAP, "tab_transfer.tex"), "w") as fh:
     fh.write("\\bottomrule\n\\end{tabular}}\n\\end{table}\n")
 
 # full version for supplement (with topology transfer)
-with open(os.path.join(PAP, "tab_transfer_full.tex"), "w") as fh:
+with open(os.path.join(OUT, "tab_transfer_full.tex"), "w") as fh:
     fh.write("\\begin{table}[h]\n\\caption{All transfer experiments: final "
              "FoM after 150 evaluations (mean $\\pm$ std, three seeds).}\n"
              "\\centering\\small\n\\begin{tabular}{lcc}\n\\toprule\n"
@@ -160,7 +162,7 @@ with open(os.path.join(PAP, "tab_transfer_full.tex"), "w") as fh:
     fh.write("\\bottomrule\n\\end{tabular}\n\\end{table}\n")
 
 # ---------------- Supplement: per-seed + Welch ----------------
-with open(os.path.join(PAP, "tab_perseed.tex"), "w") as fh:
+with open(os.path.join(OUT, "tab_perseed.tex"), "w") as fh:
     fh.write("\\begin{table}[h]\n\\caption{Per-seed unified FoM and Welch "
              "$t$-test of the proposed method against the strongest "
              "baseline per circuit.}\n\\centering\\small\n"
@@ -188,7 +190,7 @@ with open(os.path.join(PAP, "tab_perseed.tex"), "w") as fh:
     fh.write("\\bottomrule\n\\end{tabular}\n\\end{table}\n")
 
 # ---------------- Supplement: cost table ----------------
-with open(os.path.join(PAP, "tab_cost.tex"), "w") as fh:
+with open(os.path.join(OUT, "tab_cost.tex"), "w") as fh:
     fh.write("\\begin{table}[h]\n\\caption{Measured cost accounting per run "
              "(mean over runs on GF180MCU): simulator evaluations used for "
              "optimization, shared normalization and calibration costs, and "
@@ -417,7 +419,7 @@ n_seeds = max(len(seeds_of(OURS, "CT2")), 3)
 SEEDW = {3: "three", 4: "four", 5: "five"}.get(n_seeds, str(n_seeds))
 pretrain_b = "1500" if use_tr2 else "600"
 
-with open(os.path.join(PAP, "results_macros.tex"), "w") as fh:
+with open(os.path.join(OUT, "results_macros.tex"), "w") as fh:
     fh.write("% auto-generated from run logs; do not edit by hand\n")
     fh.write("\\newcommand{\\FoMsummary}{" + fom_summary() + "}\n")
     fh.write("\\newcommand{\\ConvSummary}{" + conv_txt + "}\n")

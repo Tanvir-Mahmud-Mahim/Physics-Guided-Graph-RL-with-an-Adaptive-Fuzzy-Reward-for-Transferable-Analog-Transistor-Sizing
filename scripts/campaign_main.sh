@@ -1,6 +1,8 @@
 #!/bin/bash
 # Main comparison campaign: 10 methods x 3 CTs x 3 seeds, 600-step budget, GF180MCU
-cd /root/work/gcnsac
+# run from the repository folder (override with GCNSAC_DIR=/path/to/repo)
+cd "${GCNSAC_DIR:-$(cd "$(dirname "$0")/.." && pwd)}" || exit 1
+mkdir -p results
 JOBS=()
 for ct in CT1 CT2 CT3; do
   for m in bo mace a2c ppo a2c_tskf ppo_tskf gcnddpg gcnsac gcnsac_tskf gcnsac_tskf_pia; do

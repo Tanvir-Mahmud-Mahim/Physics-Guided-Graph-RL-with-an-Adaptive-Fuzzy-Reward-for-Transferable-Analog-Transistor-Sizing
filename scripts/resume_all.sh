@@ -1,7 +1,9 @@
 #!/bin/bash
 # Resume-aware campaign: runs every missing experiment (main, ablation,
 # transfer), skipping any run whose results JSON already exists.
-cd /root/work/gcnsac
+# run from the repository folder (override with GCNSAC_DIR=/path/to/repo)
+cd "${GCNSAC_DIR:-$(cd "$(dirname "$0")/.." && pwd)}" || exit 1
+mkdir -p results
 LOG=results/campaign_resume.log
 
 run_if_missing() {  # tag, command...

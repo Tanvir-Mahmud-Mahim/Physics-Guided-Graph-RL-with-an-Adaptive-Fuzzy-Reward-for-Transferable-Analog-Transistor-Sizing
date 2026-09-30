@@ -1,6 +1,8 @@
 #!/bin/bash
 # Phase 2: waits for the main campaign, then runs ablations + transfer studies.
-cd /root/work/gcnsac
+# run from the repository folder (override with GCNSAC_DIR=/path/to/repo)
+cd "${GCNSAC_DIR:-$(cd "$(dirname "$0")/.." && pwd)}" || exit 1
+mkdir -p results
 while ! grep -q "MAIN CAMPAIGN DONE" results/campaign_main.log 2>/dev/null; do
   sleep 60
 done
