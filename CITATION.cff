@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: "If you use this code, trained models or run data, please cite them as below. The accompanying paper, 'Physics-Guided Graph Reinforcement Learning with an Adaptive Fuzzy Reward for Transferable Analog Transistor Sizing', has been submitted to IEEE TCAD."
+type: software
+title: "Physics-Guided Graph RL with an Adaptive Fuzzy Reward for Transferable Analog Transistor Sizing"
+authors:
+  - family-names: Mahim
+    given-names: Tanvir M.
+    affiliation: BRAC University
+license: Apache-2.0
+repository-code: "https://github.com/Tanvir-Mahmud-Mahim/Physics-Guided-Graph-RL-with-an-Adaptive-Fuzzy-Reward-for-Transferable-Analog-Transistor-Sizing"
+keywords:
+  - analog circuit sizing
+  - graph reinforcement learning
+  - interval type-2 fuzzy reward
+  - transfer learning
+  - ngspice
+  - GF180MCU
+  - SKY130
