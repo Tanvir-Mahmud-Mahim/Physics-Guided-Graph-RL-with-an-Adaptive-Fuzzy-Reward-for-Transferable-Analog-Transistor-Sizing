@@ -13,7 +13,13 @@ import os, json, subprocess, tempfile, uuid
 import numpy as np
 import torch
 
-CAL_DIR = os.path.expanduser("~/work/gcnsac/results/cal")
+# Calibration cache: results/cal/ in the repository folder (the folder above
+# gcnsac/), the same folder run.py writes its results to. Override with the
+# environment variable GCNSAC_CAL_DIR.
+CAL_DIR = os.environ.get(
+    "GCNSAC_CAL_DIR",
+    os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))),
+                 "results", "cal"))
 
 # ---------------- calibration against ngspice ----------------
 
