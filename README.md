@@ -2,25 +2,25 @@
 
 [![License](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](https://www.apache.org/licenses/LICENSE-2.0)
 
-Code, trained models and run data for the paper **"Physics-Guided Graph
+This repository holds the code, trained models and run data for the paper **"Physics-Guided Graph
 Reinforcement Learning with an Adaptive Fuzzy Reward for Transferable Analog
 Transistor Sizing"** (submitted to IEEE TCAD, the IEEE Transactions on
 Computer-Aided Design of Integrated Circuits and Systems).
-The paper's author list is not recorded in this repository; the repository is
-maintained by Tanvir M. Mahim (BRAC University).
+The paper's author list is not recorded in this repository. I, Tanvir M. Mahim
+(BRAC University), maintain this repository.
 
 - Repository: https://github.com/Tanvir-Mahmud-Mahim/Physics-Guided-Graph-RL-with-an-Adaptive-Fuzzy-Reward-for-Transferable-Analog-Transistor-Sizing
 
 Everything runs on open tools: the ngspice circuit simulator, the open
 GF180MCU and SKY130 process design kits (PDKs, the transistor model files a
 chip factory publishes), and the ASU Predictive Technology Model (PTM) cards
-for 65 nm and 45 nm. **No foundry PDK files are stored in this repository**;
-Section 3 explains how to download them.
+for 65 nm and 45 nm. **No foundry PDK files are stored in this repository**.
+Section 3 explains how you can download them.
 
 According to the earlier README, the archived run logs are "the exact state
-used to build every table and figure in the paper". Rebuilding the summary
-file and figures from them reproduces the archived copies exactly (checked
-here; see [Section 9](#9-built-in-checks)).
+used to build every table and figure in the paper". When I rebuilt the summary
+file and figures from them, they matched the archived copies exactly (see
+[Section 9](#9-built-in-checks)).
 
 ---
 
@@ -69,13 +69,13 @@ This code lets a computer learn the sizing by trial and reward
 - **Transfer.** An agent trained on the 180 nm GF180MCU process is reused
   on 130 nm (SKY130), 65 nm and 45 nm (PTM), or on a different circuit.
 
-Three test circuits are used: CT-1, a two-stage voltage amplifier; CT-2, a
+The code uses three test circuits: CT-1, a two-stage voltage amplifier; CT-2, a
 two-stage transimpedance amplifier (TIA, it turns a current into a voltage);
 and CT-3, a three-stage TIA. The code compares the method with Bayesian
 optimization (BO), a MACE-style multi-acquisition BO, A2C and PPO (standard
 RL without a graph), and GCN-DDPG (the GCN-RL method of Wang et al., DAC 2020,
 as `gcnsac/agents.py` describes it). Every method is scored with the **same
-figure of merit** (FoM), computed by the simulation environment, so the fuzzy
+figure of merit** (FoM), which the simulation environment computes. So the fuzzy
 reward only changes how an agent learns, never how it is scored.
 
 ---
@@ -119,17 +119,17 @@ Physics-Guided-Graph-RL-...-Transistor-Sizing/
 `-- models.tar.gz.part-00 ... part-09   trained network weights, split into 10 parts (86 MB packed, 95 MB unpacked)
 ```
 
-**What `pdk_setup/` contains.** Two PTM model cards (`65nm_bulk.pm`, 146
+**What `pdk_setup/` contains.** You will find two PTM model cards (`65nm_bulk.pm`, 146
 lines, with the comments "PTM 65nm NMOS" and "PTM 65nm PMOS"; `45nm_bulk.pm`,
 141 lines, headed "PTM High Performance 45nm Metal Gate / High-K /
 Strained-Si") and a small wrapper,
-`sky130_mini_tt.spice`. The wrapper holds no model data: it includes four
+`sky130_mini_tt.spice`. The wrapper holds no model data. It includes four
 files from the official SKY130 repository (`parameters/invariant.spice`,
 `parameters/lod.spice`, and the typical-corner `nfet_01v8` and `pfet_01v8`
-model files) and sets 18 parameters to zero (9 per transistor type, with
+model files). It also sets 18 parameters to zero (9 per transistor type, with
 names ending in `_slope`, `_slope1` or `_slope_spectre`).
 
-**What the archives contain** (listed with `tar tzvf`; nothing else is inside):
+**What the archives contain.** I listed their contents with `tar tzvf`, and nothing else is inside:
 
 | Archive | Unpacks to | Contents |
 |---|---|---|
@@ -143,11 +143,11 @@ names ending in `_slope`, `_slope1` or `_slope_spectre`).
 | | `results/w/*_tskfhist.npy` | 209 recordings of the fuzzy reward's adaptation |
 
 The earlier README described the model archive as "448 trained model
-checkpoints (`results/w/*.pt`)"; the 448 files are in fact 239 `.pt` files
+checkpoints (`results/w/*.pt`)". In fact, the 448 files are 239 `.pt` files
 plus 209 `.npy` files. Neither archive contains PDK or model-card files.
 
 The folders `results/` (after unpacking, and all generated outputs) and
-`pdk/` (if you download the PDKs there) are not part of the repository; the
+`pdk/` (if you download the PDKs there) are not part of the repository. The
 `.gitignore` file keeps them out of git.
 
 ---
@@ -156,19 +156,19 @@ The folders `results/` (after unpacking, and all generated outputs) and
 
 ### 3.1 Python packages and ngspice
 
-The Python version is not recorded in the repository; the code was checked
-here with **Python 3.11**. There is no `requirements.txt`. Install:
+The repository does not record a Python version. I checked the code
+with **Python 3.11**. There is no `requirements.txt`, so install the packages directly:
 
 ```
 pip install torch numpy scipy matplotlib
 ```
 
-Versions used for the checks in this guide: Python 3.11.15, PyTorch 2.14.0
+These are the versions I used for the checks in this guide: Python 3.11.15, PyTorch 2.14.0
 (only the CPU is used), NumPy 2.4.4, SciPy 1.17.1, Matplotlib 3.10.9.
 
-The simulator **ngspice** must be installed and callable as `ngspice`
-(the earlier README names ngspice 42; the checks here used the Ubuntu package
-ngspice 42+ds-3build1):
+You also need the simulator **ngspice**, installed and callable as `ngspice`.
+The earlier README names ngspice 42. For the checks here I used the Ubuntu package
+ngspice 42+ds-3build1:
 
 ```
 sudo apt install ngspice
@@ -180,7 +180,7 @@ and without the PDKs.
 ### 3.2 Device models (PDKs)
 
 The code looks for the model files in the folder named by the environment
-variable `GCNSAC_PDK_ROOT` (default `~/work/pdk`). It expects:
+variable `GCNSAC_PDK_ROOT` (default `~/work/pdk`). It expects these files:
 
 | Technology | File(s) the code loads |
 |---|---|
@@ -189,7 +189,7 @@ variable `GCNSAC_PDK_ROOT` (default `~/work/pdk`). It expects:
 | `ptm65` | `$GCNSAC_PDK_ROOT/ptm/65nm_bulk.pm` |
 | `ptm45` | `$GCNSAC_PDK_ROOT/ptm/45nm_bulk.pm` |
 
-From the repository folder, on Linux or macOS:
+Run this from the repository folder, on Linux or macOS:
 
 ```
 export GCNSAC_PDK_ROOT=$PWD/pdk
@@ -207,11 +207,11 @@ cp pdk_setup/sky130_mini_tt.spice pdk/sky130/models/mini_tt.spice
 ```
 
 The downloads took about 128 MB (GF180MCU) and 28 MB (SKY130) here. Both
-upstream repositories are licensed Apache-2.0. `export` lasts only for the
-current terminal; set it again in a new one.
+upstream repositories use the Apache-2.0 license. `export` lasts only for the
+current terminal, so set it again when you open a new one.
 
 **Which PDK version?** The repository did not record the versions used for
-the run logs. These pins were found and checked as follows (September 2026):
+the run logs. I found and checked these pins as follows (September 2026):
 
 | PDK | Commit | Evidence |
 |---|---|---|
@@ -219,9 +219,9 @@ the run logs. These pins were found and checked as follows (September 2026):
 | SKY130 | `f62031a1be9aefe902d6d54cddd6f59b57627436` (current `main`) | Re-simulated best designs and the calibration match the archived logs exactly. |
 | PTM 65 nm / 45 nm | the cards in `pdk_setup/` | Re-simulated best designs match exactly. |
 
-`python3 scripts/check_pdk_reproduction.py` tests your set-up (Section 9).
-**GF180MCU results cannot be reproduced exactly from these files alone:**
-the GF180MCU model files switch on random transistor mismatch, and ngspice
+You can test your setup with `python3 scripts/check_pdk_reproduction.py` (Section 9).
+**GF180MCU results cannot be reproduced exactly from these files alone.**
+The GF180MCU model files switch on random transistor mismatch, and ngspice
 seeds it with a number that the logs do not record (Section 10).
 
 ---
@@ -232,7 +232,7 @@ Run all commands from the repository folder.
 
 ### Way A: rebuild the tables, text numbers and figures from the archived runs (about 15 seconds)
 
-Needs Python only (no ngspice, no PDKs).
+You need only Python for this (no ngspice, no PDKs).
 
 ```
 tar xzf results_logs.tar.gz
@@ -252,12 +252,12 @@ python3 scripts/fig_advantage.py
   `results/tables/` (they create the folder).
 - The figures go to `results/figs/`.
 
-Both archives are needed: two figures read the `results/w/*_tskfhist.npy`
+You need both archives, because two figures read the `results/w/*_tskfhist.npy`
 files from the model archive.
 
 ### Way B: recompute one archived run and compare (about 1 to 2 minutes)
 
-Needs ngspice and the PTM cards only (no PDK download). After Way A (or at least
+You need only ngspice and the PTM cards for this (no PDK download). Run it after Way A (or at least
 after `tar xzf results_logs.tar.gz`):
 
 ```
@@ -269,7 +269,7 @@ python3 -c "import json; a=json.load(open('results/tr_CT1_ptm65_sc_s0.json')); b
 ```
 
 This repeats the archived run `tr_CT1_ptm65_sc_s0` (the proposed method
-trained from scratch on CT-1 at 65 nm, 150 simulations). Here it printed
+trained from scratch on CT-1 at 65 nm, 150 simulations). When I ran it, it printed
 `same history: True 3.792502335347418 3.792502335347418` (13 s, measured on
 a shared 2-core machine). The run uses the archived calibration files in
 `results/cal/` from `results_logs.tar.gz` (Section 10).
@@ -285,12 +285,12 @@ To check the model files of all four technologies at once, run
    then `chunk2.py`, then `chunk3.py`. Details and caveats are in Section 5.
 3. Then run the four commands of Way A (without unpacking the archives).
 
-PTM and SKY130 runs repeat the archived logs exactly. GF180MCU runs do not:
-every GF180MCU simulation draws new random transistor mismatch (Section 10),
+PTM and SKY130 runs repeat the archived logs exactly. GF180MCU runs do not.
+Every GF180MCU simulation draws new random transistor mismatch (Section 10),
 so recomputed GF180MCU numbers differ from the archived ones.
 
 The archived logs record a total of 16.5 hours of single-run time for all
-326 runs; the scripts run two jobs at a time. These campaigns were not re-run
+326 runs. The scripts run two jobs at a time. I did not re-run these campaigns
 here.
 
 ---
@@ -314,9 +314,9 @@ here.
 | 9 | `python3 scripts/fig_advantage.py` | Draws the advantage figure and writes its macros | 1.9 s | `results/figs/F_advantage.pdf`, `results/tables/adv_macros.tex` |
 | check | `python3 scripts/check_pdk_reproduction.py [--pdk ...] [--gf180-pid]` | Re-simulates the stored best design of 10 archived runs (2-3 per technology) and compares metrics and FoM with the logs; `--gf180-pid` also redoes the GF180MCU calibration with the archived ngspice process IDs (Section 9) | 22 s for the 10 designs; 30 s for `--pdk gf180 --gf180-pid` | printed report; exit status 0 if all expected matches are found |
 
-\*Times measured on a shared two-core computer, except "logs", which is the
+\*I measured these times on a shared two-core computer. The exception is "logs", which is the
 sum of the `wall_s` field over the archived runs of that step (single-run
-times on the author's machine).
+times on my machine).
 
 **Options of `run.py`.** `--method` is one of `bo`, `mace`, `a2c`, `ppo`,
 `a2c_tskf`, `ppo_tskf`, `gcnddpg`, `gcnsac`, `gcnsac_tskf`,
@@ -343,12 +343,12 @@ weights exist.
 
 - `campaign_main.sh`, `campaign2.sh` and `resume_all.sh` first change to
   the repository folder (the folder above `scripts/`), wherever they are
-  started from. To use another folder, set `GCNSAC_DIR=/path/to/folder`; if
+  started from. To use another folder, set `GCNSAC_DIR=/path/to/folder`. If
   that folder does not exist, the script stops.
 - These three scripts send each run's output to `results/<name>.log` and
   create `results/` if it does not exist yet.
-- `chunk.py`, `chunk2.py`, `chunk3.py` and `worker.py` use relative paths
-  and must also be started from the repository folder.
+- `chunk.py`, `chunk2.py`, `chunk3.py` and `worker.py` use relative paths,
+  so you must also start them from the repository folder.
 - If a normalization file is missing, `run.py` first simulates 300 random
   designs to make it (`norm_sims` in the log). All archived logs have
   `norm_sims` = 0, because the files already existed.
@@ -357,8 +357,8 @@ weights exist.
 
 ## 6. Which script makes which figure and table
 
-The paper's figure numbers are not recorded in the repository, except that
-the earlier README called `F_advantage.pdf` "Fig. 3". The table lists the
+The repository does not record the paper's figure numbers. The one exception is that
+the earlier README called `F_advantage.pdf` "Fig. 3". So the table lists the
 output files.
 
 | Output file | Content (as drawn by the code) | Data used | Drawn by |
@@ -378,8 +378,8 @@ output files.
 | `results/tables/tab_cost.tex` | Simulations and mean run time per method | `aggregate.json` | `gen_tables.py` |
 | `results/tables/results_macros.tex`, `adv_macros.tex` | Numbers and sentences used in the paper text | `aggregate.json`, run logs | `gen_tables.py`, `fig_advantage.py` |
 
-The regenerated figures were compared with the archived PDFs by rendering
-both to images: all seven that `figures.py` and `fig_advantage.py` redraw
+I compared the regenerated figures with the archived PDFs by rendering
+both to images. All seven that `figures.py` and `fig_advantage.py` redraw
 are pixel-identical.
 
 ---
@@ -419,11 +419,11 @@ bulk CMOS" and "45 nm metal-gate/high-k".
 
 **Design variables** (from `gcnsac/circuits.py`). CT-1 has 10 (five widths,
 three lengths, the Miller capacitor 0.1 to 10 pF, the bias current 1 to
-50 uA); CT-2 has 10 and CT-3 has 13 (input device W and L, then W of the
+50 uA). CT-2 has 10 and CT-3 has 13 (input device W and L, then W of the
 NMOS and PMOS and a shared L per stage, the capacitor 0.05 to 5 pF, the bias
 current 1 to 100 uA). Widths range from twice the smallest width of the node
 to the largest, except the TIA input device (smallest width to 0.3 x the
-largest); lengths use the node's full L range. All values are set on a
+largest). Lengths use the node's full L range. All values are set on a
 logarithmic scale between their limits, and W and L are rounded to the grid.
 
 **Fixed circuit values.** CT-1: 1 pF load, input common-mode voltage 0.42 x
@@ -441,10 +441,10 @@ comparison and the ablations (seeds 0-4); 150 simulations per transfer run
 (seeds 0-2); 1500 for the `pia1500_*` pretraining (seeds 0-2); 300 random
 designs (seed 1234) per circuit and node for normalization, shared by all
 runs. The physics-model calibration uses 8 ngspice runs per node (2
-gate-voltage sweeps and 6 drain-voltage sweeps); it is stored and reused, and
+gate-voltage sweeps and 6 drain-voltage sweeps). It is stored and reused, and
 it is counted in `sims_used` only in the run that made it (these runs show
 158 instead of 150). The earlier README and `gen_tables.py` say "24
-calibration DC sweeps"; the code performs 8.
+calibration DC sweeps", but the code performs 8.
 
 **Learning settings fixed in the code** (`agents.py`, `tskf.py`,
 `baselines.py`, `run.py`):
@@ -467,14 +467,14 @@ calibration DC sweeps"; the code performs 8.
 
 ## 9. Built-in checks
 
-The repository has no automated test suite. These checks were run for this
+The repository has no automated test suite. I ran these checks for this
 guide:
 
 - **Tables and figures from the archived logs** (Way A): `aggregate.py`
   rebuilds `results/agg/aggregate.json` byte for byte; the seven figures that
   `figures.py` and `fig_advantage.py` redraw are pixel-identical to the
   archived PDFs.
-- **One run from scratch** (Way B): `tr_CT1_ptm65_sc_s0` was re-run and gave
+- **One run from scratch** (Way B): I re-ran `tr_CT1_ptm65_sc_s0`, and it gave
   the identical history, best FoM and best design.
 - **Re-simulating stored designs** (`scripts/check_pdk_reproduction.py`,
   with ngspice 42 and the pinned PDK commits of Section 3.2): the best designs
@@ -509,8 +509,8 @@ guide:
 
 ## 10. Notes on the calculations
 
-- **Units.** Widths and lengths are in metres inside the code; for SKY130 the
-  netlist uses `.option scale=1.0u`, so sizes are printed in micrometres.
+- **Units.** Widths and lengths are in meters inside the code. For SKY130 the
+  netlist uses `.option scale=1.0u`, so sizes are printed in micrometers.
   Capacitors are in farads and currents in amperes.
 - **Unified FoM** (`env.py`). Power, noise, bandwidth, unity-gain frequency
   and transimpedance are first taken as log10. Each metric is then scaled to
@@ -519,15 +519,15 @@ guide:
   "Less is better" metrics (power, noise) enter as 1 minus the scaled value.
   The FoM is the sum over metrics, all with weight 1 (CT-1 has 5 metrics,
   the TIAs 4), and is never below 0. A metric that could not be measured
-  counts as 0 ("more is better") or -0.5 ("less is better"); a CT-1 design
+  counts as 0 ("more is better") or -0.5 ("less is better"). A CT-1 design
   with negative gain in dB, or a design with no measurable metric, gets FoM
   0.
-- **Phase margin.** ngspice gives the phase in radians; the code converts it
+- **Phase margin.** ngspice gives the phase in radians. The code converts it
   to degrees as 180 minus the phase drop from 10 Hz to the unity-gain
   frequency.
 - **Noise.** `inoise_total` from ngspice's noise analysis. The caption in
   `gen_tables.py` states the unit as V^2 for CT-1 and A^2 for the TIAs.
-- **Reward versus score.** The fuzzy reward only trains the agent; the logs
+- **Reward versus score.** The fuzzy reward only trains the agent. The logs
   and tables always use the unified FoM. The fuzzy system adapts toward the
   FoM divided by the number of metrics.
 - **Calibration cache.** `surrogate.py` stores calibrations in the
@@ -536,7 +536,7 @@ guide:
   Unpacking `results_logs.tar.gz` puts the archived files there. If a file
   is missing, the calibration is redone (8 ngspice runs) and saved there.
   The archived files for `sky130`, `ptm65` and `ptm45` have no EKV
-  slope factor (`n_ekv`); for these, the EKV model uses the code's default
+  slope factor (`n_ekv`). For these, the EKV model uses the code's default
   1.3.
 - **Output folder for tables.** `gen_tables.py` and `fig_advantage.py` write
   their LaTeX files to `results/tables/` and create it if needed.
@@ -546,56 +546,56 @@ guide:
   point).
 - **GF180MCU: every simulation includes random mismatch.** This is why
   GF180MCU numbers cannot be recomputed exactly. The model files and the
-  ngspice version are not the cause: with the pinned files and ngspice 42 the
+  ngspice version are not the cause. With the pinned files and ngspice 42, the
   archived calibration is reproduced bit for bit (below).
   - *The model files.* The GF180MCU file `design.ngspice` sets
     `sw_stat_mismatch = 1` (and `sw_stat_global = 1`) by default, and the
     code loads it unchanged. In the `typical` section, every `nmos_3p3` and
     `pmos_3p3` transistor is a subcircuit that adds a random threshold-voltage
     shift, `delvto = agauss(0, 0.7071 * par_vth * 1e-6 / sqrt(Leff * Weff), 1)`
-    with `par_vth` = 0.007148 (NMOS) or 0.00666 (PMOS); for example, a standard
+    with `par_vth` = 0.007148 (NMOS) or 0.00666 (PMOS). For example, this gives a standard
     deviation of 3.7 mV for W = 4.4 um, L = 0.56 um. (The global process
     variation is not part of `typical`.) The SKY130 files loaded through the
     wrapper in `pdk_setup/` and the PTM cards contain no random functions, so
     these technologies are not affected.
   - *The random numbers.* ngspice 42, started with a circuit file
     (`ngspice -b file`, as the code does), seeds these random draws with its
-    own process ID (PID): at start-up it calls `initw()`
-    (`src/frontend/trannoise/wallace.c`), which runs `srand(getpid())` after
+    own process ID (PID). At start-up it calls `initw()`
+    (`src/frontend/trannoise/wallace.c`). This runs `srand(getpid())` after
     `.spiceinit` has been read, so `set rndseed` or `setseed` there has no
-    effect (checked). The code starts a new ngspice process for each
-    simulation and does not record the PID, so each archived GF180MCU number is one
+    effect (I checked this). The code starts a new ngspice process for each
+    simulation and does not record the PID. So each archived GF180MCU number is one
     random sample. The same design gives different results in different
-    simulations. The archive itself shows this: for a given seed, `bo` and
-    `mace` simulate the same 40 starting designs, yet the first design of
+    simulations. The archive itself shows this. For a given seed, `bo` and
+    `mace` simulate the same 40 starting designs. Yet the first design of
     seed 1 on CT-1 scored 0 in `bo_CT1_gf180_s1` and 3.094 in
-    `mace_CT1_gf180_s1`. In all six seed and circuit cases where at least one
-    of the two logs has a non-zero FoM for that first design, the two values
+    `mace_CT1_gf180_s1`. Now take the six seed and circuit cases where at least one
+    of the two logs has a non-zero FoM for that first design. In all six, the two values
     differ (CT-1 seeds 1 and 2, CT-2 seeds 2 and 3, CT-3 seeds 2 and 3).
-  - *Size of the effect.* Twenty re-simulations of the best design of
-    `bo_CT1_gf180_s0` (archived FoM 3.869) gave FoM between 0 and 3.830
-    (median 3.08); three of the twenty scored 0. With mismatch switched off
+  - *Size of the effect.* I re-simulated the best design of
+    `bo_CT1_gf180_s0` (archived FoM 3.869) twenty times. The FoM ranged from 0 to 3.830
+    (median 3.08), and three of the twenty scored 0. With mismatch switched off
     (`.param sw_stat_mismatch=0` after the `.lib` line), the same design
     gives 3.289, and the NMOS threshold of the
     calibration is 0.3614 V instead of the archived 0.3557 V. Because the
     best FoM of a run is the highest of many random samples, a re-simulation
     of that design usually scores lower than the logged value.
-  - *What was reproduced.* With the pinned GF180MCU files (Section 3.2),
-    ngspice 42 and the PIDs 10243, 10245, 10247 and 10250 (NMOS sweeps) and
-    10255 (PMOS gate sweep; the three PMOS drain sweeps gave the lower
-    limit 0.001 for every PID tried), the calibration file
-    `results/cal/gf180.json` is reproduced exactly. These PIDs were found by re-implementing the ngspice
+  - *What was reproduced.* I used the pinned GF180MCU files (Section 3.2) and
+    ngspice 42. With the PIDs 10243, 10245, 10247 and 10250 (NMOS sweeps) and
+    10255 (PMOS gate sweep), the calibration file
+    `results/cal/gf180.json` is reproduced exactly. The three PMOS drain sweeps gave the lower
+    limit 0.001 for every PID I tried. I found these PIDs by re-implementing the ngspice
     random-number steps (glibc `srand`/`rand`, the Tausworthe generator and
-    `initw()`), checked against real ngspice runs started under chosen PIDs
+    `initw()`), and I checked them against real ngspice runs started under chosen PIDs
     in a new Linux PID namespace. Each ngspice 42 run uses two PID numbers
     (the process and one thread). This confirms the model files and the
-    ngspice version; it needs a Linux system with glibc (other C libraries
-    and ngspice versions were not tested).
+    ngspice version. It needs a Linux system with glibc (I did not test other C libraries
+    or ngspice versions).
   - *What cannot be reproduced.* The PIDs of the 128,100 GF180MCU
-    simulations in the 218 GF180MCU run logs are unknown, so these logs
+    simulations in the 218 GF180MCU run logs are unknown. So these logs
     cannot be recomputed exactly with any PDK version or setting. Switching mismatch
     off gives repeatable numbers, but they are different from the archived
-    ones. The code was left unchanged so that it still describes how the
+    ones. I left the code unchanged, so that it still describes how the
     archived results were made.
   - *Calibration file date.* In `results_logs.tar.gz`, `results/cal/gf180.json`
     is dated 24 July 2026 06:13, later than most GF180MCU runs (from 23 July
@@ -604,10 +604,10 @@ guide:
     counts the 8 calibration simulations (`sims_used` equals the budget in
     all of them). This suggests that GF180MCU runs of the graph-based agents
     finished before 06:13 used an earlier calibration, which is not in the
-    archive; the file dates are the only evidence for this.
+    archive. The file dates are the only evidence for this.
 - **Which transfer runs the tables use.** `aggregate.py` uses `tr3_*_ft`
   (EKV-trained encoder) for "with transfer" when at least three such logs
-  exist, otherwise `tr_*_ft`; "no transfer" is always `tr_*_sc`. Topology
+  exist, otherwise `tr_*_ft`. "No transfer" is always `tr_*_sc`. Topology
   transfer uses `tt3_*_ft` when available and `tt_*_sc`. The `tr2_*`,
   `tt2_*` and `pia1500_*` logs are not used by any table or figure, and
   neither is `results/policy_ft/`. The topology panels of
@@ -631,14 +631,14 @@ The repository has no tagged releases.
 | Documentation update | 30 Sep 2026 | New README, CHANGELOG and CITATION; code and data unchanged |
 | Initial upload | 24 Jul 2026 | Code, run-log archive, model archive and `pdk_setup/` |
 
-Details are in [CHANGELOG.md](CHANGELOG.md).
+You can find the details in [CHANGELOG.md](CHANGELOG.md).
 
 ---
 
 ## 12. How to cite
 
-GitHub shows a **"Cite this repository"** button in the right-hand column,
-which reads `CITATION.cff`.
+GitHub shows a **"Cite this repository"** button in the right-hand column.
+It reads `CITATION.cff`.
 
 > T. M. Mahim, "Physics-Guided Graph RL with an Adaptive Fuzzy Reward for
 > Transferable Analog Transistor Sizing" (code, trained models and run data),
@@ -655,10 +655,10 @@ TCAD. Please cite it once it is published.
 
 The repository is released under the Apache License 2.0 (see `LICENSE`).
 The earlier README adds that PDK files keep their upstream licenses
-(Apache-2.0); this holds for the GF180MCU and SKY130 repositories you
-download (checked). The PTM cards in `pdk_setup/` come from the ASU
-Predictive Technology Model; the repository does not state their license
+(Apache-2.0). I checked that this holds for the GF180MCU and SKY130 repositories you
+download. The PTM cards in `pdk_setup/` come from the ASU
+Predictive Technology Model. The repository does not state their license
 terms.
 
-Questions and bug reports: please open an issue on this repository, or
-contact Tanvir M. Mahim, BRAC University (tanvir.mahim@bracu.ac.bd).
+If you have questions or find a bug, please open an issue on this repository. You can also
+contact me, Tanvir M. Mahim, at BRAC University (tanvir.mahim@bracu.ac.bd).
