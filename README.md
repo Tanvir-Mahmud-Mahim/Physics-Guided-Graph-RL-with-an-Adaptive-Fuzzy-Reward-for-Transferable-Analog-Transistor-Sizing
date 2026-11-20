@@ -7,10 +7,12 @@ This repository holds the code, trained models and run data for the paper:
 **"Physics-Guided Graph Reinforcement Learning with an Adaptive Fuzzy Reward for Transferable Analog
 Transistor Sizing"**
 
-The paper has been submitted to IEEE TCAD (the IEEE Transactions on
-Computer-Aided Design of Integrated Circuits and Systems).
-The paper's author list is not recorded in this repository. I, Tanvir M. Mahim
-(BRAC University), maintain this repository.
+T. M. Mahim, R. H. Palash, M. Mosaddequr Rahman, M. Rashed, N. Jain and
+N. Chowdhury, IEEE Transactions on Computer-Aided Design of Integrated Circuits
+and Systems (TCAD), Early Access, published 19 November 2026,
+DOI [10.1109/TCAD.2026.3755653](https://doi.org/10.1109/TCAD.2026.3755653),
+IEEE Xplore: https://ieeexplore.ieee.org/document/11804979.
+I, Tanvir M. Mahim (BRAC University), maintain this repository.
 
 - Repository: https://github.com/Tanvir-Mahmud-Mahim/Physics-Guided-Graph-RL-with-an-Adaptive-Fuzzy-Reward-for-Transferable-Analog-Transistor-Sizing
 
@@ -282,9 +284,28 @@ It reads `CITATION.cff`.
 > GitHub (2026),
 > https://github.com/Tanvir-Mahmud-Mahim/Physics-Guided-Graph-RL-with-an-Adaptive-Fuzzy-Reward-for-Transferable-Analog-Transistor-Sizing
 
-The paper, "Physics-Guided Graph Reinforcement Learning with an Adaptive Fuzzy
-Reward for Transferable Analog Transistor Sizing", has been submitted to IEEE
-TCAD. Please cite it once it is published.
+If you use this repository, please also cite the paper. It was published in
+IEEE TCAD as an Early Access article on 19 November 2026
+(DOI [10.1109/TCAD.2026.3755653](https://doi.org/10.1109/TCAD.2026.3755653); IEEE Xplore: https://ieeexplore.ieee.org/document/11804979):
+
+> T. M. Mahim, R. H. Palash, M. Mosaddequr Rahman, M. Rashed, N. Jain and
+> N. Chowdhury, "Physics-Guided Graph Reinforcement Learning with an Adaptive
+> Fuzzy Reward for Transferable Analog Transistor Sizing," *IEEE Transactions
+> on Computer-Aided Design of Integrated Circuits and Systems*, Early Access,
+> 2026, doi: 10.1109/TCAD.2026.3755653.
+
+BibTeX (from the "Cite This" export of IEEE Xplore; the keywords field is left
+out, and the volume, issue and pages are not yet assigned for Early Access):
+
+```bibtex
+@ARTICLE{11804979,
+  author={Mahim, Tanvir M. and Palash, Rafid Hassan and Mosaddequr Rahman, M. and Rashed, Mahbub and Jain, Navneet and Chowdhury, Nadim},
+  journal={IEEE Transactions on Computer-Aided Design of Integrated Circuits and Systems},
+  title={Physics-Guided Graph Reinforcement Learning with an Adaptive Fuzzy Reward for Transferable Analog Transistor Sizing},
+  year={2026},
+  note={Early Access},
+  doi={10.1109/TCAD.2026.3755653}}
+```
 
 ---
 
