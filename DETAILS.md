@@ -434,7 +434,8 @@ The repository has no tagged releases.
 
 | Version | Date | Changes |
 |---|---|---|
-| Fixes (this version) | 30 Sep 2026 | Table and macro files go to `results/tables/`; calibration cache in `results/cal/`; campaign scripts no longer `cd /root/work/gcnsac` and create `results/`; `.gitignore`; PDK commits pinned; `check_pdk_reproduction.py`; GF180MCU reproducibility explained |
+| Citation update (this version) | 20 Nov 2026 | README and `CITATION.cff` cite the published paper (IEEE TCAD, Early Access, DOI 10.1109/TCAD.2026.3755653); code and data unchanged |
+| Fixes | 30 Sep 2026 | Table and macro files go to `results/tables/`; calibration cache in `results/cal/`; campaign scripts no longer `cd /root/work/gcnsac` and create `results/`; `.gitignore`; PDK commits pinned; `check_pdk_reproduction.py`; GF180MCU reproducibility explained |
 | Documentation update | 30 Sep 2026 | New README, CHANGELOG and CITATION; code and data unchanged |
 | Initial upload | 24 Jul 2026 | Code, run-log archive, model archive and `pdk_setup/` |
 
