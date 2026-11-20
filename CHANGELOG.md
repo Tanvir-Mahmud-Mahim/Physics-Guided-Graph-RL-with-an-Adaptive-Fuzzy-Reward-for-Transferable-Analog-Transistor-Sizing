@@ -3,6 +3,16 @@
 All notable changes to this repository are listed here, newest first.
 The repository has no tagged releases; entries are dated by their commits.
 
+## Citation update (2026-11-20)
+
+Documentation only; no code, data, model or result file changed.
+
+- The paper was published in IEEE TCAD as an Early Access article on
+  19 November 2026 (DOI 10.1109/TCAD.2026.3755653, IEEE Xplore document 11804979). README
+  (opening paragraph and Section 12) and `CITATION.cff` (new
+  `preferred-citation`) now give the published reference and the author
+  list from the IEEE Xplore record, instead of "submitted to IEEE TCAD".
+
 ## Fixes (2026-09-30)
 
 No archived result, run log, model file or computed number changed. The
